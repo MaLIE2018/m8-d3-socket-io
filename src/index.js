@@ -24,26 +24,20 @@ io.on("connection", socket => {
 
     console.log(socket.rooms)
 
-    // socket.on("join-room", (room) => {
-    //     socket.join(room)
-    //     console.log(socket.rooms)
-    // })
+    socket.on("join-room", (room) => {
+        socket.join(room)
+        console.log(socket.rooms)
+    })
 
-    socket.on("setUsername", ({ username, room }) => {
-        onlineUsers.push({ username: username, id: socket.id, room })
+    socket.on("setUsername", ({ username }) => {
+        onlineUsers.push({ username: username, id: socket.id })
 
         //.emit - echoing back to itself
         socket.emit("loggedin")
 
-        //.broadcast.emit - emitting to everyone else
-        socket.broadcast.emit("newConnection")
-
-        socket.join(room)
-
-        console.log(socket.rooms)
 
         //io.sockets.emit - emitting to everybody in the known world
-        //io.sockets.emit("newConnection")
+        io.sockets.emit("newConnection")
     })
 
     socket.on("disconnect", () => {
@@ -53,12 +47,14 @@ io.on("connection", socket => {
 
     socket.on("sendMessage", async ({ message, room }) => {
 
-        await RoomModel.findOneAndUpdate({ name: room }, {
-            $push: { chatHistory: message }
-        })
+        // await RoomModel.findOneAndUpdate({ name: room }, {
+        //     $push: { chatHistory: message }
+        // })
 
         socket.to(room).emit("message", message)
     })
+
+   
 
 
 })
